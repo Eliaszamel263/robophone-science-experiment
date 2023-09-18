@@ -1,9 +1,9 @@
 //Elias Zamel Weaam hammud
-//*******************************************************************************************
+//****************************************************************************************************************
 // This project is about science experiment dedicated to help the users step by step in there science experiment
 // using the scale and esp32 with oled screen and contactoing by firebase and robophone app, we made a project to
 // help with scaling and calibrating the scale.
-//*******************************************************************************************
+//****************************************************************************************************************
 
 #include <Arduino.h>
 #if defined(ESP32)
@@ -115,48 +115,60 @@ void setup() {
   display.display();
   Serial.println("Initializing the scale");
 
-//*** Debug
+  //*** Debug
   Serial.printf(" Get factor --- %s", Firebase.RTDB.getInt(&fbdo, "/Robophone/5669122872442880/factor") ? String(fbdo.intData()).c_str() : fbdo.errorReason().c_str());
-//***
+  //***
 
   scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);
 
-  while (!calibrated){
-      scale.set_scale();
-      scale.tare();    
-      //if (scale.is_ready()) {
-        scale.set_scale();    
-        display.println("Tare... remove any weights from the scale.");
+    while(!calibrated){
+      display.clearDisplay();
+      display.display();
+      if (scale.is_ready()){
+        scale.set_scale();   
+        display.setTextSize(1);
+        display.setTextColor(SSD1306_WHITE);
+        display.setCursor(0,0); 
+        display.println("Tare, remove any\nweights from the scale.");
         display.display();
-
         delay(5000);
+        display.clearDisplay();
+        display.display();
         scale.tare();
+        display.setTextSize(1);
+        display.setTextColor(SSD1306_WHITE);
+        display.setCursor(0,0); 
+        display.println("Tare Done ...");
+        display.display();
+        delay(1000);
         display.clearDisplay();
         display.display();
         display.setTextSize(1);
         display.setTextColor(SSD1306_WHITE);
         display.setCursor(0,0);
-        display.print("Place a known object");
+        display.print("Place a known object\non the scale\n");
         display.display();
         delay(5000);
         long reading = scale.get_units(10);
         display.print("Result: \n ");
-        display.print(reading);
+        display.print(round(reading));
+
         display.display();
-        if(reading < -2000 ){
+        if(reading < -5000 ){
           Firebase.RTDB.setInt(&fbdo, "/Robophone/5669122872442880/weight/value",reading);
         }
-      //}
+      }
       if(Firebase.RTDB.getInt(&fbdo, "/Robophone/5669122872442880/factor")){
         factor = fbdo.intData();
       }
       else{
         Serial.println( fbdo.errorReason());
       }
-      Serial.printf("INSIDE :: Get factor --- %s \n", Firebase.RTDB.getInt(&fbdo, "/Robophone/5669122872442880/factor") ? String(fbdo.intData()).c_str() : fbdo.errorReason().c_str());
+      //Serial.printf("INSIDE :: Get factor --- %s \n", Firebase.RTDB.getInt(&fbdo, "/Robophone/5669122872442880/factor") ? String(fbdo.intData()).c_str() : fbdo.errorReason().c_str());
       if(factor != 0 ){
         calibrated = true;
       }
+      delay(5000);
     } 
   scale.set_scale(factor);                    
   scale.tare();              // reset the scale to 0
@@ -167,38 +179,34 @@ void loop() {
     if ( digitalRead(BUTTON_PIN) == 0)
       {
        scale.set_scale(factor);  
-       delay(100);                  
        scale.tare();
-       delay(100);
       }
     Serial.print("Weight is: ");
     Serial.print(scale.get_units(), 1);
     Serial.print("\n");
 
     display.clearDisplay();
-    display.setTextSize(1.9999);
-  display.setTextColor(SSD1306_WHITE);
-  display.setCursor(0,0);
-  display.print("Digital weight:\n");
-  display.print(scale.get_units(5));
-  if (Firebase.ready() && signupOK){
-    if (Firebase.RTDB.setInt(&fbdo, "Robophone/5669122872442880/weight/value", scale.get_units(10))){
-      Serial.println("PASSED");
-      Serial.println("PATH: " + fbdo.dataPath());
-      Serial.println("TYPE: " + fbdo.dataType());
-    }
-    else {
-      Serial.println("FAILED");
-      Serial.println("REASON: " + fbdo.errorReason());
-    }
+    display.setTextSize(1);
+    display.setTextColor(SSD1306_WHITE);
+    display.setCursor(0,0);
+    display.print("Digital weight:\n");
+    display.print(round(scale.get_units(10)));
+    display.display();
+
+    if (Firebase.ready() && signupOK){
+      if (Firebase.RTDB.setInt(&fbdo, "Robophone/5669122872442880/weight/value", round(scale.get_units(10)))){
+        Serial.println("PASSED");
+        Serial.println("PATH: " + fbdo.dataPath());
+        Serial.println("TYPE: " + fbdo.dataType());
+      }
+      else {
+        Serial.println("FAILED");
+        Serial.println("REASON: " + fbdo.errorReason());
+      }
   }
-  display.print(" g\t | ");
-  display.print(scale.get_units(10)*0.035274);
-  display.print(" oz\t");
-  display.display();
   Serial.print("\n");
-  scale.power_down();             // put the ADC in sleep mode
+  scale.power_down();             
   delay(1000);
   scale.power_up();
-}  
+  }  
 }
