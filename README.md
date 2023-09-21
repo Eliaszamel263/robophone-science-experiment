@@ -10,13 +10,22 @@ by using the roobophone app we make contact with the user, using the andriod pho
 
 #        Folder Description
 ESP32: source code for the esp.
+
 RoboPhone App: contains code for the robophone.
+
 Firebase : is used in both esp32 and robophone app.
+
 Assets: 3D printed parts.
+
 
 #        Arduino libraries used in this project
 1 - WiFiManager .
+
 2 - Adafruit_GFX .
+
 3 - Adafruit_SSD1306 .
+
 4 - HX711 - scale library.
+
 5 - Firebase Arduino Client Library for ESP8266 and ESP32.
+
