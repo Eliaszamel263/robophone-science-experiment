@@ -1,7 +1,8 @@
 # robophone-science-experiment
 #        Created by : Elias Zamel and Weaam Hammud.
 
-Robophone Science experiment \n
+Robophone Science experiment
+
 This project provides a step by step science experiment for students in different ages.
 using the robophone app and arduino ide, we created a project that takes the student from point zero, knowing and learning about the scale, to calibrating the scale using linear equation
 to performing the experiment by measuring different types of material using the scale.
